@@ -149,6 +149,8 @@ def train_sft(epochs=6, lr=3e-3, seed=RANDOM_STATE):
     return lm
 
 
+sft = train_sft()
+
 def annotator_score(text):
     """Simulated annotator: mostly values helpfulness, but also overvalues length and repeated words."""
     words = text.lower().split()
