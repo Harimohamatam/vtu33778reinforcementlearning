@@ -123,13 +123,8 @@ function nextTokenLogProbabilities(
   sequence: number[],
   tokenPosition: number,
 ) {
-  const context = Array.from(
-    { length: checkpoint.context },
-    (_, index) => {
-      const sequenceIndex = sequence.length - checkpoint.context + index;
-      return sequenceIndex < 0 ? checkpoint.bos : sequence[sequenceIndex] ?? checkpoint.bos;
-    },
-  );
+  const paddedSequence = [...Array.from({ length: checkpoint.context - 1 }, () => checkpoint.bos), ...sequence];
+  const context = paddedSequence.slice(sequence.length - 1, sequence.length - 1 + checkpoint.context);
   const features = context.flatMap((tokenId) => parameters.E[tokenId] ?? []);
   features.push(...(parameters.pos[tokenPosition] ?? []));
 
