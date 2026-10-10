@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the alignment inference client-side and stateless, with compact, reproducible notebook-trained checkpoints bundled as JSON so live scoring needs no server service.
