@@ -96,6 +96,10 @@ export type GeneratedResponse = {
 
 export type PromptCheck = { tokenIds: number[]; unsupported: string[] };
 
+export const modelVocabulary = checkpoint.vocab.filter(
+  (word) => word !== "<pad>" && word !== "<bos>" && word !== "<eos>",
+);
+
 function normalizeWord(word: string) {
   return word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
 }
@@ -176,11 +180,11 @@ function generateTokens(method: AlignmentMethod, prefix: number[]) {
   return sequence;
 }
 
-function sequenceLogProbability(method: AlignmentMethod, sequence: number[]) {
+function sequenceLogProbability(method: AlignmentMethod, sequence: number[], prefixLength: number) {
   const model = checkpoint.models[method];
   let sum = 0;
 
-  for (let index = 1; index < sequence.length; index += 1) {
+  for (let index = prefixLength + 1; index < sequence.length; index += 1) {
     const tokenId = sequence[index];
     if (tokenId === undefined || tokenId === checkpoint.pad) break;
     const logProbabilities = nextTokenLogProbabilities(model, sequence.slice(0, index), index - 1);
@@ -241,11 +245,18 @@ function independentJudge(text: string) {
   return score;
 }
 
-function evaluate(method: AlignmentMethod, sequence: number[], text: string): LiveEvaluation {
+function evaluate(
+  method: AlignmentMethod,
+  sequence: number[],
+  text: string,
+  prefixLength: number,
+): LiveEvaluation {
   return {
     goldReward: goldReward(text),
     learnedReward: learnedReward(sequence),
-    klDrift: sequenceLogProbability(method, sequence) - sequenceLogProbability("sft", sequence),
+    klDrift:
+      sequenceLogProbability(method, sequence, prefixLength) -
+      sequenceLogProbability("sft", sequence, prefixLength),
     independentJudge: independentJudge(text),
   };
 }
@@ -271,7 +282,7 @@ export function generateResponses(prompt: string, methods: AlignmentMethod[]): G
   return methods.map((method) => {
     const sequence = generateTokens(method, tokenIds);
     const text = decode(sequence);
-    return { method, text, metrics: evaluate(method, sequence, text) };
+    return { method, text, metrics: evaluate(method, sequence, text, tokenIds.length) };
   });
 }
 

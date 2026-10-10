@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   checkPrompt,
   generateResponses,
+  modelVocabulary,
   modelProvenance,
   type AlignmentMethod,
   type GeneratedResponse,
@@ -176,6 +177,12 @@ function AlignmentLab() {
                 </Button>
               </div>
             </div>
+            <details className="text-xs text-muted-foreground">
+              <summary className="w-fit cursor-pointer font-medium text-primary">
+                See the model’s {modelVocabulary.length}-word vocabulary
+              </summary>
+              <p className="mt-2 max-w-3xl leading-5">{modelVocabulary.join(" · ")}</p>
+            </details>
           </div>
         </section>
 
